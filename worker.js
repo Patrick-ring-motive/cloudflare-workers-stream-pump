@@ -64,11 +64,11 @@ async function onRequest(request, env, ctx) {
 
 
 
-const injects = `<style>body{transform:scaleX(-1);} [data-content="Advertisement"],[id^="sda"]{display:none !important;visibility:hidden !important; opacity:0 !important;}</style><script src="https://patrick-ring-motive.github.io/cloudflare-workers-stream-pump/injects/link-resolver.js?${new Date().getTime()}"></script></head>`;
+const injects = `<head><style>body{transform:scaleX(-1);} [data-content="Advertisement"],[id^="sda"]{display:none !important;visibility:hidden !important; opacity:0 !important;}</style><script src="https://patrick-ring-motive.github.io/cloudflare-workers-stream-pump/injects/unbreak.js?${new Date().getTime()}"></script><script src="https://patrick-ring-motive.github.io/cloudflare-workers-stream-pump/injects/link-resolver.js?${new Date().getTime()}"></script>`;
 
 function modifyChunk(chunk) {
-    if (chunk.includes('</head>')) {
-        chunk = chunk.replace('</head>', injects);
+    if (chunk.includes('<head>')) {
+        chunk = chunk.replace('<head>', injects);
         return {
             value: chunk,
             done: true
