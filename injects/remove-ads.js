@@ -3,7 +3,7 @@ void async function RemoveAds(){
     await import('https://unpkg.com/javaxscript/framework.js');
   }
   declare(()=>{
-    queryApplyAll('iframe,[data-content="Advertisement"],[id^="sda"],script[src^="https://s.yimg.com"],[src*="doubleclick.net"]',el=>{
+    queryApplyAll('iframe,[data-content="Advertisement"],[id^="sda"],script[src^="https://s.yimg.com"],[src*="doubleclick.net"],[src^="https://hb.yahoo.net"]',el=>{
       el.remove();
     });
   });
