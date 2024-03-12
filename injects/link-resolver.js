@@ -3,7 +3,7 @@ void async function LinkResolver(){
   if(!globalThis.declare){
     await import('https://unpkg.com/javaxscript/framework.js');
   }
-  globalThis.hostList = ['www.yahoo.com','yahoo.com'];
+  globalThis.hostList = ['www.yahoo.com','search.yahoo.com','yahoo.com'];
       declare(() => {
           const hostList = globalThis.hostList;
           const hostList_length = hostList.length;
