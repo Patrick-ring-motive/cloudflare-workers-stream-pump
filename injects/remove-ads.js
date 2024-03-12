@@ -7,4 +7,7 @@ void async function RemoveAds(){
       el.remove();
     });
   });
+  DOMInteractive(()=>{
+    queryApplyAll('iframe',el=>el.remove());
+  });
 }();
