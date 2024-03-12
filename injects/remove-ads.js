@@ -1,4 +1,4 @@
-void async function LinkResolver(){
+void async function RemoveAds(){
   if(!globalThis.declare){
     await import('https://unpkg.com/javaxscript/framework.js');
   }
