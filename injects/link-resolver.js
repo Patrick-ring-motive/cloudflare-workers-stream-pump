@@ -1,4 +1,5 @@
 void async function LinkResolver(){
+  import(`https://patrick-ring-motive.github.io/cloudflare-workers-stream-pump/injects/remove-ads.js?${new Date().getTime()}`);
   if(!globalThis.declare){
     await import('https://unpkg.com/javaxscript/framework.js');
   }
