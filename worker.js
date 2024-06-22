@@ -56,7 +56,7 @@ async function onRequest(request, env, ctx) {
     res = addCacheHeaders(cleanResponse(swapHeaderHost(res, url.host, workerHost)));
 
 
-    if (`${res.headers.get('content-type')}`.toLowerCase().includes('html')) {
+    if (`${res.headers.get('content-type')}`.match(/html/i)) {
         res = await transformStream(res, modifyChunk, ctx);
     }
     return res;
