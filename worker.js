@@ -38,7 +38,7 @@ async function onRequest(request, env, ctx) {
     let url = new URL(request.url);
     let workerHost = url.host;
     url.host = globalThis.hostMap.get(workerHost)[0];
-    if (`${request.headers.get('referer')}`.includes('hostname=')) {
+    if (`${request.headers.get('referer')}`.includes('hostname=')){
         url.host = request.headers.get('referer').split('hostname=')[1].split('?')[0].split('&')[0].split('#')[0];
     }
     if (request.url.includes('hostname=')) {
@@ -54,29 +54,15 @@ async function onRequest(request, env, ctx) {
         return swapHeaderHost(new Response(res.body, res), url.host, workerHost);
     }
     res = addCacheHeaders(cleanResponse(swapHeaderHost(res, url.host, workerHost)));
-
-
     if (`${res.headers.get('content-type')}`.match(/html/i)) {
         res = await transformStream(res, modifyChunk, ctx);
     }
     return res;
 }
 
-
-
 const injects = `<head><style>body{transform:scaleX(-1);} [data-content="Advertisement"],[id^="sda"]{display:none !important;visibility:hidden !important; opacity:0 !important;}</style><script src="https://patrick-ring-motive.github.io/cloudflare-workers-stream-pump/injects/unbreak.js?${new Date().getTime()}"></script><script src="https://patrick-ring-motive.github.io/cloudflare-workers-stream-pump/injects/link-resolver.js?${new Date().getTime()}"></script>`;
 
 function modifyChunk(chunk) {
-    if (chunk.includes('<head>')) {
-        chunk = chunk.replace('<head>', injects);
-        return {
-            value: chunk,
-            done: true
-        };
-    } else {
-        return {
-            value: chunk,
-            done: false
-        };
-    }
+    chunk = chunk?.replace?.('<head>', injects);
+    return { value: chunk, done: false };
 }
