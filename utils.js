@@ -1,7 +1,7 @@
 //utils so as to not bloat the actualy logic of the worker
 globalThis.utilImports = true;
 
-globalThis.zfetch = async function() {
+globalThis.zfetch = async function zfetch() {
     try {
         return await fetch(...arguments);
     } catch (e) {
@@ -13,7 +13,7 @@ globalThis.zfetch = async function() {
     }
 };
 
-globalThis.makeHostMap = function(map) {
+globalThis.makeHostMap = function makeHostMap(map) {
 
     globalThis.hostMap = map;
     globalThis.hostMap.get = (key) => {
@@ -24,7 +24,7 @@ globalThis.makeHostMap = function(map) {
     }
 }
 
-String.prototype.toCharCodes = function() {
+String.prototype.toCharCodes = function toCharCodea() {
     let charCodeArr = [];
     for (let i = 0; i < this.length; i++) {
         const code = this.charCodeAt(i);
@@ -33,10 +33,10 @@ String.prototype.toCharCodes = function() {
     return new Uint8Array(charCodeArr);
 }
 
-globalThis.zdecoder = function() {
+globalThis.zdecoder = function zdecoder() {
     if (!globalThis.decoder) {
         globalThis.decoder = new TextDecoder();
-        globalThis.decoder.zdecode = function(raw) {
+        globalThis.decoder.zdecode = function zdecode(raw) {
             try {
                 return globalThis.decoder.decode(raw);
             } catch (e) {
@@ -47,10 +47,10 @@ globalThis.zdecoder = function() {
     return globalThis.decoder;
 }
 
-globalThis.zencoder = function() {
+globalThis.zencoder = function zencoder() {
     if (!globalThis.encoder) {
         globalThis.encoder = new TextEncoder();
-        globalThis.encoder.zencode = function(str) {
+        globalThis.encoder.zencode = function zencode(str) {
             try {
                 return globalThis.encoder.encode(str);
             } catch (e) {
@@ -61,17 +61,17 @@ globalThis.zencoder = function() {
     return globalThis.encoder;
 }
 
-globalThis.zgetReader = function(stream) {
+globalThis.zgetReader = function zgetReader(stream) {
     if (!stream) {
         return;
     }
-    let r = Object.create(null);
+    const r = Object.create(null);
     r.reader = stream.getReader();
     r.almostDone = false;
     return r;
 }
 
-globalThis.zread = async function(reader) {
+globalThis.zread = async function zread(reader) {
     if (reader.almostDone) {
         try {
             reader.reader.releaseLock();
@@ -82,7 +82,7 @@ globalThis.zread = async function(reader) {
         };
     }
     try {
-        let rtrn = await reader.reader.read();
+        const rtrn = await reader.reader.read();
         if (rtrn.done) {
             try {
                 reader.reader.releaseLock();
