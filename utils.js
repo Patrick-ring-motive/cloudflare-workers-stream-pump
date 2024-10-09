@@ -298,3 +298,9 @@ globalThis.transformStream = async function transformStream(res, transform, ctx,
     return res;
 
 }
+
+
+globalThis.limitResponse = async function limiResponse(res, ctx, timeout) {
+   return await transformStream(res, null, ctx, {timeout:timeout,passthrough:true});
+}
+
