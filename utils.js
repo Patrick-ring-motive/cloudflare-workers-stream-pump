@@ -241,7 +241,10 @@ globalThis.zcontrollerClose = function zcontrollerClose(controller){
     }
 }
 
-globalThis.transformStream = async function transformStream(res, transform, ctx, timeout=25000) {
+globalThis.transformStream = async function transformStream(res, transform, ctx, options) {
+    options.timeout ??= 25000;
+    options.encode ??= true;
+    options.passthrough ??= false;
     let reader = zgetReader(res.body);
     let resolveStreamProcessed, timeoutHandle;
     const streamProcessed = new Promise(resolve => resolveStreamProcessed = resolve);
@@ -257,7 +260,7 @@ globalThis.transformStream = async function transformStream(res, transform, ctx,
                 console.log(`Stream timed out after ${timeout}ms`);
                 zcontrollerClose(controller);
                 resolveStreamProcessed();
-            }, timeout);
+            }, options.timeout);
             
             while (true) {
                 try {
@@ -266,10 +269,10 @@ globalThis.transformStream = async function transformStream(res, transform, ctx,
                         break;
                     }
                     let encodedChunk;
-                    if (!modifiedChunk.done) {
-                        let decodedChunk = zdecoder().zdecode(chunk.value);
+                    if (!modifiedChunk.done && !options.passthough) {
+                        let decodedChunk = options.encode?zdecoder().zdecode(chunk.value):chunk.value;
                         modifiedChunk = transform(decodedChunk);
-                        encodedChunk = zencoder().zencode(modifiedChunk.value);
+                        encodedChunk = options.encode?zencoder().zencode(modifiedChunk.value):modifiedChunk;
                     } else {
                         encodedChunk = chunk.value;
                     }
