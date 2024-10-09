@@ -1,104 +1,23 @@
 //utils so as to not bloat the actualy logic of the worker
 globalThis.utilImports = true;
 
-globalThis.zfetch = async function zfetch() {
+globalThis.zfetch = async function() {
     try {
         return await fetch(...arguments);
     } catch (e) {
+        try{
+            return await fetch(arguments[0]);
+        }catch(r){
         console.log(e);
-        return new Response(arguments[0] + '\n' + e.message + '\n' + e.stack, {
+        return new Response(arguments[0]+'\n'+e.message+'\n'+e.stack, {
             status: 569,
             statusText: e.message
         });
     }
-};
-
-globalThis.makeHostMap = function makeHostMap(map) {
-
-    globalThis.hostMap = map;
-    globalThis.hostMap.get = (key) => {
-        if (globalThis.hostMap[key]) {
-            return globalThis.hostMap[key];
-        }
-        return globalThis.hostMap.default;
     }
-}
-
-String.prototype.toCharCodes = function toCharCodea() {
-    let charCodeArr = [];
-    for (let i = 0; i < this.length; i++) {
-        const code = this.charCodeAt(i);
-        charCodeArr.push(code);
-    }
-    return new Uint8Array(charCodeArr);
-}
-
-globalThis.zdecoder = function zdecoder() {
-    if (!globalThis.decoder) {
-        globalThis.decoder = new TextDecoder();
-        globalThis.decoder.zdecode = function zdecode(raw) {
-            try {
-                return globalThis.decoder.decode(raw);
-            } catch (e) {
-                return e.message;
-            }
-        }
-    }
-    return globalThis.decoder;
-}
-
-globalThis.zencoder = function zencoder() {
-    if (!globalThis.encoder) {
-        globalThis.encoder = new TextEncoder();
-        globalThis.encoder.zencode = function zencode(str) {
-            try {
-                return globalThis.encoder.encode(str);
-            } catch (e) {
-                return e.message.toCharCodes();
-            }
-        }
-    }
-    return globalThis.encoder;
-}
-
-globalThis.zgetReader = function zgetReader(stream) {
-    if (!stream) {
-        return;
-    }
-    const r = Object.create(null);
-    r.reader = stream.getReader();
-    r.almostDone = false;
-    return r;
-}
-
-globalThis.zread = async function zread(reader) {
-    if (reader.almostDone) {
-        try {
-            reader.reader.releaseLock();
-        } catch (e) {}
-        return {
-            value: undefined,
-            done: true
-        };
-    }
-    try {
-        const rtrn = await reader.reader.read();
-        if (rtrn.done) {
-            try {
-                reader.reader.releaseLock();
-            } catch (e) {}
-        }
-        return rtrn;
-    } catch (e) {
-        reader.almostDone = true;
-        return {
-            value: e.message,
-            done: false
-        };
-    }
-};
-
-globalThis.swapHeaderHost = function(res, oldHost, newHost) {
+  };
+  
+  globalThis.swapHeaderHost = function(res, oldHost, newHost) {
     try {
         res.headers.forEach((value, key) => {
             res.headers.set(key, value.replace(oldHost, newHost));
@@ -131,6 +50,17 @@ globalThis.requestRetry = async function(url, workerHost, request) {
     res = new Response(res.body, res);
     res = swapHeaderHost(res, url.host, workerHost);
     return res;
+}
+
+globalThis.makeHostMap = function(map) {
+
+    globalThis.hostMap = map;
+    globalThis.hostMap.get = (key) => {
+        if (globalThis.hostMap[key]) {
+            return globalThis.hostMap[key];
+        }
+        return globalThis.hostMap.default;
+    }
 }
 
 
@@ -201,16 +131,113 @@ globalThis.addCacheHeaders = function(re) {
     return re;
 }
 
-globalThis.transformStream = async function(res, transform, ctx) {
-    let reader;
-    try {
-        reader = zgetReader(res.body);
-    } catch (e) {
-        console.log(e.message);
+
+globalThis.ctxAwaitUntil = function(ctx) {
+    ctx.awaitUntil=async function(promise){
+        ctx.waitUntil(promise);
+        return await promise;
     }
+    return ctx
+}
+
+
+
+String.prototype.toCharCodes = function toCharCodes() {
+    let charCodeArr = [];
+    for (let i = 0; i < this.length; i++) {
+        const code = this.charCodeAt(i);
+        charCodeArr.push(code);
+    }
+    return new Uint8Array(charCodeArr);
+}
+
+
+globalThis.znewReadableStream = function znewReadableStream(){
+  try{
+    return new ReadableStream(...arguments);
+  }catch(e){
+    return new Response(e.message).body;
+  }
+}
+
+
+
+globalThis.zdecoder = function zdecoder() {
+    if (!globalThis.decoder) {
+        globalThis.decoder = new TextDecoder();
+        globalThis.decoder.zdecode = function zdecode(raw) {
+            try {
+                return globalThis.decoder.decode(raw);
+            } catch (e) {
+                return e.message;
+            }
+        }
+    }
+    return globalThis.decoder;
+}
+
+globalThis.zencoder = function zencoder() {
+    if (!globalThis.encoder) {
+        globalThis.encoder = new TextEncoder();
+        globalThis.encoder.zencode = function zencode(str) {
+            try {
+                return globalThis.encoder.encode(str);
+            } catch (e) {
+                return e.message.toCharCodes();
+            }
+        }
+    }
+    return globalThis.encoder;
+}
+
+globalThis.getReader = function getReader(stream) { 
+    const r = Object.create(null);
+    r.reader = stream.getReader();
+    r.almostDone = false;
+    return r;
+}
+
+globalThis.zgetReader = function zgetReader(stream) { 
+    try{
+		return getReader(stream);
+	}catch(e){
+		return getReader(znewReadableStream(e.message));
+	}
+}
+
+globalThis.zread = async function zread(reader) {
+    if (reader.almostDone) {
+        try {
+            reader.reader.releaseLock();
+        } catch (e) {}
+        return {
+            value: undefined,
+            done: true
+        };
+    }
+    try {
+        const rtrn = await reader.reader.read();
+        if (rtrn.done) {
+            try {
+                reader.reader.releaseLock();
+            } catch (e) {}
+        }
+        return rtrn;
+    } catch (e) {
+        reader.almostDone = true;
+        return {
+            value: e.message,
+            done: false
+        };
+    }
+};
+
+
+globalThis.transformStream = async function transformStream(res, transform, ctx) {
+    let reader = zgetReader(res.body);
     let resolveStreamProcessed;
     const streamProcessed = new Promise(resolve => resolveStreamProcessed = resolve);
-    let stream = new ReadableStream({
+    const stream = znewReadableStream({
         async start(controller) {
             let modifiedChunk = {
                 value: "",
@@ -246,13 +273,4 @@ globalThis.transformStream = async function(res, transform, ctx) {
     res = new Response(stream, res);
     return res;
 
-}
-
-
-
-globalThis.makeAwaitUntil = function(ctx) {
-    return async function(promise) {
-        ctx.waitUntil(promise);
-        return promise;
-    }
 }
