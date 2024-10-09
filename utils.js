@@ -241,7 +241,7 @@ globalThis.zcontrollerClose = function zcontrollerClose(controller){
     }
 }
 
-globalThis.transformStream = async function transformStream(res, transform, ctx, timeout) {
+globalThis.transformStream = async function transformStream(res, transform, ctx, timeout=25000) {
     let reader = zgetReader(res.body);
     let resolveStreamProcessed, timeoutHandle;
     const streamProcessed = new Promise(resolve => resolveStreamProcessed = resolve);
@@ -252,13 +252,12 @@ globalThis.transformStream = async function transformStream(res, transform, ctx,
                 done: false
             };
             
-            if (timeout > 0) {
-                timeoutHandle = setTimeout(() => {
-                    console.log(`Stream timed out after ${timeout}ms`);
-                    zcontrollerClose(controller);
-                    resolveStreamProcessed();
-                }, timeout);
-            }
+            
+            timeoutHandle = setTimeout(() => {
+                console.log(`Stream timed out after ${timeout}ms`);
+                zcontrollerClose(controller);
+                resolveStreamProcessed();
+            }, timeout);
             
             while (true) {
                 try {
