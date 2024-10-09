@@ -232,6 +232,14 @@ globalThis.zread = async function zread(reader) {
     }
 };
 
+globalThis.zcontrollerClose = function zcontrollerClose(controller){
+    try{
+        return controller.close();
+    }catch(e){
+        console.log(e);
+        return controller;
+    }
+}
 
 globalThis.transformStream = async function transformStream(res, transform, ctx) {
     let reader = zgetReader(res.body);
@@ -268,7 +276,7 @@ globalThis.transformStream = async function transformStream(res, transform, ctx)
                     }
                 }
             }
-            controller.close();
+            zcontrollerClose(controller);
             resolveStreamProcessed();
         }
     });
