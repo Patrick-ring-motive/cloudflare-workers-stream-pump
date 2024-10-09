@@ -259,8 +259,13 @@ globalThis.transformStream = async function transformStream(res, transform, ctx)
                     }
                     controller.enqueue(encodedChunk);
                 } catch (e) {
-                    console.log(e.message);
-                    break;
+                    try{
+                        console.log(e.message);
+                        controller.enqueue(zencoder().zencode(e.message));
+                        break;
+                    }catch{
+                        break;
+                    }
                 }
             }
             controller.close();
