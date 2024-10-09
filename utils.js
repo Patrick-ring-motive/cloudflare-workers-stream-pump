@@ -281,7 +281,7 @@ globalThis.transformStream = async function transformStream(res, transform, ctx)
         }
     });
 
-    ctx.waitUntil(streamProcessed);
+    ctx?.waitUntil?.(streamProcessed);
     tryReleaseLock(reader.reader);
     res = new Response(stream, res);
     return res;
