@@ -269,7 +269,7 @@ globalThis.transformStream = async function transformStream(res, transform, ctx,
                         break;
                     }
                     let encodedChunk;
-                    if (!modifiedChunk.done && !options.passthough) {
+                    if (!modifiedChunk.done && !options.passthrough) {
                         let decodedChunk = options.encode?zdecoder().zdecode(chunk.value):chunk.value;
                         modifiedChunk = transform(decodedChunk);
                         encodedChunk = options.encode?zencoder().zencode(modifiedChunk.value):modifiedChunk;
@@ -300,7 +300,7 @@ globalThis.transformStream = async function transformStream(res, transform, ctx,
 }
 
 
-globalThis.limitResponse = async function limiResponse(res, ctx, timeout) {
+globalThis.limitResponse = async function limitResponse(res, ctx, timeout) {
    return await transformStream(res, null, ctx, {timeout:timeout,passthrough:true});
 }
 
