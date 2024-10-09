@@ -7,7 +7,7 @@ globalThis.zfetch = async function() {
     } catch (e) {
         try{
             return await fetch(arguments[0]);
-        }catch(r){
+        }catch{
         console.log(e);
         return new Response(arguments[0]+'\n'+e.message+'\n'+e.stack, {
             status: 569,
