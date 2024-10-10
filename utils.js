@@ -241,7 +241,7 @@ globalThis.zcontrollerClose = function zcontrollerClose(controller){
     }
 }
 
-globalThis.transformStream = async function transformStream(res, transform, ctx, options) {
+globalThis.transformStream = async function transformStream(res, transform, ctx, options={}) {
     const req = res instanceof Request;
     try {
         options.timeout ??= 25000;
