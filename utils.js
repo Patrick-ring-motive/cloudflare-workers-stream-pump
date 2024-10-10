@@ -242,60 +242,69 @@ globalThis.zcontrollerClose = function zcontrollerClose(controller){
 }
 
 globalThis.transformStream = async function transformStream(res, transform, ctx, options) {
-    options.timeout ??= 25000;
-    options.encode ??= true;
-    options.passthrough ??= false;
-    let reader = zgetReader(res.body);
-    let resolveStreamProcessed, timeoutHandle;
-    const streamProcessed = new Promise(resolve => resolveStreamProcessed = resolve);
-    const stream = znewReadableStream({
-        async start(controller) {
-            let modifiedChunk = {
-                value: "",
-                done: false
-            };
-            
-            
-            timeoutHandle = setTimeout(() => {
-                console.log(`Stream timed out after ${timeout}ms`);
-                zcontrollerClose(controller);
-                resolveStreamProcessed();
-            }, options.timeout);
-            
-            while (true) {
-                try {
-                    const chunk = await (zread(reader));
-                    if (chunk.done) {
-                        break;
-                    }
-                    let encodedChunk;
-                    if (!modifiedChunk.done && !options.passthrough) {
-                        let decodedChunk = options.encode?zdecoder().zdecode(chunk.value):chunk.value;
-                        modifiedChunk = transform(decodedChunk);
-                        encodedChunk = options.encode?zencoder().zencode(modifiedChunk.value):modifiedChunk;
-                    } else {
-                        encodedChunk = chunk.value;
-                    }
-                    controller.enqueue(encodedChunk);
-                } catch (e) {
-                    try{
-                        console.log(e.message);
-                        controller.enqueue(zencoder().zencode(e.message));
-                        break;
-                    }catch{
-                        break;
+    const req = res instanceof Request;
+    try {
+        options.timeout ??= 25000;
+        options.encode ??= true;
+        options.passthrough ??= false;
+        let reader = zgetReader(res.body);
+        let resolveStreamProcessed, timeoutHandle;
+        const streamProcessed = new Promise(resolve => resolveStreamProcessed = resolve);
+        const stream = znewReadableStream({
+            async start(controller) {
+                let modifiedChunk = {
+                    value: "",
+                    done: false
+                };
+
+
+                timeoutHandle = setTimeout(() => {
+                    console.log(`Stream timed out after ${timeout}ms`);
+                    zcontrollerClose(controller);
+                    resolveStreamProcessed();
+                }, options.timeout);
+
+                while (true) {
+                    try {
+                        const chunk = await (zread(reader));
+                        if (chunk.done) {
+                            break;
+                        }
+                        let encodedChunk;
+                        if (!modifiedChunk.done && !options.passthrough) {
+                            let decodedChunk = options.encode ? zdecoder().zdecode(chunk.value) : chunk.value;
+                            modifiedChunk = transform(decodedChunk);
+                            encodedChunk = options.encode ? zencoder().zencode(modifiedChunk.value) : modifiedChunk;
+                        } else {
+                            encodedChunk = chunk.value;
+                        }
+                        controller.enqueue(encodedChunk);
+                    } catch (e) {
+                        try {
+                            console.log(e.message);
+                            controller.enqueue(zencoder().zencode(e.message));
+                            break;
+                        } catch {
+                            break;
+                        }
                     }
                 }
+                zcontrollerClose(controller);
+                resolveStreamProcessed();
             }
-            zcontrollerClose(controller);
-            resolveStreamProcessed();
-        }
-    });
-    streamProcessed.then(() => clearTimeout(timeoutHandle));
-    ctx?.waitUntil?.(streamProcessed);
-    tryReleaseLock(reader.reader);
-    res = new Response(stream, res);
-    return res;
+        });
+        streamProcessed.then(() => {
+            tryReleaseLock(reader.reader);
+            clearTimeout(timeoutHandle);
+        });
+        ctx?.waitUntil?.(streamProcessed);
+        res = req ? new Request(res, {
+            body: stream
+        }) : new Response(stream, res);
+        return res;
+    } catch (e) {
+        return res;
+    }
 
 }
 
