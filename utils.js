@@ -1,14 +1,14 @@
 //utils so as to not bloat the actualy logic of the worker
 globalThis.utilImports = true;
 
-globalThis.zfetch = async function() {
+globalThis.zfetch = async function zfetch() {
     try {
         return await fetch(...arguments);
     } catch (e) {
         try{
             return await fetch(arguments[0]);
         }catch{
-        console.log(e);
+        console.warn(e,...arguments);
         return new Response(arguments[0]+'\n'+e.message+'\n'+e.stack, {
             status: 569,
             statusText: e.message
@@ -113,7 +113,7 @@ globalThis.tryReleaseLock = function(stream, reader) {
         try {
             reader.releaseLock();
         } catch (e) {
-            console.log(e.message);
+            console.warn(e,...arguments);
         }
     }
 }
@@ -236,7 +236,7 @@ globalThis.zcontrollerClose = function zcontrollerClose(controller){
     try{
         return controller.close();
     }catch(e){
-        console.log(e);
+        console.log(e,...arguments);
         return controller;
     }
 }
